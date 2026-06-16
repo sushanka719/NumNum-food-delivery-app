@@ -4,7 +4,7 @@ import { StorefrontProduct, StorefrontCategory, ProductVariant, ProductOption } 
 const PREFERRED_CURRENCY = process.env.NEXT_PUBLIC_DEFAULT_CURRENCY ?? "usd";
 
 const PRODUCT_FIELDS =
-  "*variants,*variants.prices,*variants.options,*options,*options.values,+categories,+images";
+  "*variants,*variants.prices,*variants.options,*options,*options.values,+categories,*images";
 
 function resolvePrice(prices: any[]): number {
   if (!prices?.length) return 0;
@@ -29,6 +29,25 @@ function mapVariant(v: any, productOptions: any[]): ProductVariant {
   };
 }
 
+const BACKEND = process.env.NEXT_PUBLIC_MEDUSA_BACKEND_URL || "http://localhost:9000";
+
+// Medusa file-local provider sometimes saves URLs without the /static/ prefix
+// when the provider wasn't configured at upload time. Fix those URLs.
+function fixImageUrl(url: string | null | undefined): string {
+  if (!url) return "";
+  if (url.startsWith("http")) {
+    try {
+      const u = new URL(url);
+      // If path doesn't start with /static/ and looks like a bare filename, prepend it
+      if (!u.pathname.startsWith("/static/") && /^\/([\w.-]+\.(jpg|jpeg|png|webp|gif|avif))$/i.test(u.pathname)) {
+        u.pathname = "/static" + u.pathname;
+        return u.toString();
+      }
+    } catch {}
+  }
+  return url;
+}
+
 function mapProduct(p: any): StorefrontProduct {
   const rawOptions: any[] = p.options ?? [];
   const options: ProductOption[] = rawOptions.map((o: any) => ({
@@ -48,8 +67,8 @@ function mapProduct(p: any): StorefrontProduct {
     name: p.title,
     slug: p.handle,
     price: firstVariant?.price ?? 0,
-    image: p.thumbnail ?? "",
-    images: p.images?.map((i: any) => i.url) ?? (p.thumbnail ? [p.thumbnail] : []),
+    images: p.images?.map((i: any) => fixImageUrl(i.url)).filter(Boolean) ?? (p.thumbnail ? [p.thumbnail] : []),
+    image: fixImageUrl(p.thumbnail ?? p.images?.[0]?.url ?? ""),
     description: p.description ?? "",
     details: [],
     category: p.categories?.[0]?.name ?? "General",

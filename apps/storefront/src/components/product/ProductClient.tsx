@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { StorefrontProduct, ProductVariant } from "@/lib/data/types";
 import { useCartStore } from "@/store/cart";
+import { useWishlistStore } from "@/store/wishlist";
 import ProductCard from "@/components/ProductCard";
 import { blurDataURL } from "@/lib/image";
 
@@ -84,6 +85,8 @@ export default function ProductClient({ product, relatedProducts }: ProductClien
   const [quantity, setQuantity] = useState(1);
   const [openAccordion, setOpenAccordion] = useState<string | null>("description");
   const { addItem, isLoading } = useCartStore();
+  const { toggleItem, isWishlisted } = useWishlistStore();
+  const wishlisted = isWishlisted(product.id);
 
   // Initialize selected options from the first variant (not the raw option values array)
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>(() => {
@@ -335,8 +338,15 @@ export default function ProductClient({ product, relatedProducts }: ProductClien
                 {isLoading ? "Adding..." : !isInStock ? "Sold Out" : "Add to Cart"}
               </motion.button>
 
-              <button className="h-14 w-14 border border-[var(--card-border)] flex items-center justify-center hover:bg-[var(--section-bg)] transition-colors">
-                <Heart size={20} className="text-[var(--foreground)]" />
+              <button
+                onClick={() => toggleItem({ id: product.id, slug: product.slug, name: product.name, price: displayPrice, image: product.image })}
+                aria-label={wishlisted ? "Remove from wishlist" : "Save to wishlist"}
+                className="h-14 w-14 border border-[var(--card-border)] flex items-center justify-center hover:bg-[var(--section-bg)] transition-colors"
+              >
+                <Heart
+                  size={20}
+                  className={wishlisted ? "fill-current text-[var(--foreground)]" : "text-[var(--foreground)]"}
+                />
               </button>
             </div>
 

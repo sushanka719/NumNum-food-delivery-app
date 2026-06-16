@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, User, ShoppingBag, Search } from "lucide-react";
+import { Menu, X, User, ShoppingBag, Search, Heart } from "lucide-react";
 import { useCartStore } from "@/store/cart";
 import { useAuthStore } from "@/store/auth";
+import { useWishlistStore } from "@/store/wishlist";
 import SearchOverlay from "@/components/SearchOverlay";
 
 const navLinks = [
@@ -25,7 +26,9 @@ export default function Navbar() {
   const accountRef = useRef<HTMLDivElement>(null);
   const { toggleCart, getTotalItems } = useCartStore();
   const { customer, logout, _hasHydrated } = useAuthStore();
+  const { getCount } = useWishlistStore();
   const totalItems = getTotalItems();
+  const wishlistCount = getCount();
 
   useEffect(() => {
     setMounted(true);
@@ -77,6 +80,18 @@ export default function Navbar() {
             >
               <Search size={20} strokeWidth={1.5} />
             </button>
+            <Link
+              href="/wishlist"
+              className="relative flex items-center text-[var(--foreground)] hover:text-[var(--text-secondary)] transition-colors"
+              aria-label="Wishlist"
+            >
+              <Heart size={20} strokeWidth={1.5} />
+              {mounted && wishlistCount > 0 && (
+                <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[var(--foreground)] text-[var(--background)] text-[9px] font-bold rounded-full flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
             {mounted && _hasHydrated && customer ? (
               <div ref={accountRef} className="relative">
                 <button
@@ -101,6 +116,13 @@ export default function Navbar() {
                         className="block px-4 py-3 text-xs uppercase tracking-[0.15em] text-[var(--foreground)] hover:bg-[var(--card-border)] transition-colors"
                       >
                         My Orders
+                      </Link>
+                      <Link
+                        href="/wishlist"
+                        onClick={() => setAccountOpen(false)}
+                        className="block px-4 py-3 text-xs uppercase tracking-[0.15em] text-[var(--foreground)] hover:bg-[var(--card-border)] transition-colors border-t border-[var(--card-border)]"
+                      >
+                        Wishlist {mounted && wishlistCount > 0 && `(${wishlistCount})`}
                       </Link>
                       <button
                         onClick={() => { setAccountOpen(false); logout(); }}
