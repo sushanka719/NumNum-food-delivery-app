@@ -1553,6 +1553,7 @@ __metadata:
     "@medusajs/cli": "npm:2.15.5"
     "@medusajs/dashboard": "npm:2.15.5"
     "@medusajs/draft-order": "npm:2.15.5"
+    "@medusajs/file-local": "npm:^2.15.5"
     "@medusajs/framework": "npm:2.15.5"
     "@medusajs/medusa": "npm:2.15.5"
     "@medusajs/payment-stripe": "npm:^2.15.5"
@@ -3941,7 +3942,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@medusajs/file-local@npm:2.15.5":
+"@medusajs/file-local@npm:2.15.5, @medusajs/file-local@npm:^2.15.5":
   version: 2.15.5
   resolution: "@medusajs/file-local@npm:2.15.5"
   peerDependencies:
